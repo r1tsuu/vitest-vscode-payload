@@ -1,10 +1,10 @@
 {
   "publisher": "vitest",
   "name": "explorer",
-  "displayName": "Vitest",
-  "version": "1.38.0",
+  "displayName": "Vitest with Payload",
+  "version": "1337.38.0-payload",
   "packageManager": "pnpm@10.11.1",
-  "description": "A Vite-native testing framework. It's fast!",
+  "description": "A Vite-native testing framework. It's fast! + Payload DB selector",
   "author": "Vitest Team",
   "license": "MIT",
   "repository": {

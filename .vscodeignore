@@ -25,3 +25,5 @@ tsconfig.base.json
 eslint.config.mjs
 scripts/**
 test-results/**
+packages/**
+pnpm-workspace.yaml
