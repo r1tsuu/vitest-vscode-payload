@@ -132,14 +132,14 @@ export class ExtensionWorker implements ExtensionWorkerTransport {
     this.setTestNamePattern(undefined)
   }
 
-  public async updateSnapshots(files?: ExtensionTestSpecification[] | string[] | undefined, testNamePattern?: string | undefined) {
+  public async updateSnapshots(files?: ExtensionTestSpecification[] | string[] | undefined, testNamePattern?: string | undefined, env?: Record<string, string>) {
     this.configOverride.snapshotOptions = {
       updateSnapshot: 'all',
       // environment is resolved inside a worker thread
       snapshotEnvironment: null as any,
     }
     try {
-      return await this.runTests(files, testNamePattern)
+      return await this.runTests(files, testNamePattern, env)
     }
     finally {
       delete this.configOverride.snapshotOptions
@@ -162,18 +162,42 @@ export class ExtensionWorker implements ExtensionWorkerTransport {
     return (specs as ExtensionTestSpecification[] || [])
   }
 
-  public async runTests(specsOrPaths: ExtensionTestSpecification[] | string[] | undefined, testNamePattern?: string) {
+  public async runTests(specsOrPaths: ExtensionTestSpecification[] | string[] | undefined, testNamePattern?: string, env?: Record<string, string>) {
     // @ts-expect-error private method in Vitest <=2.1.5
     await this.vitest.initBrowserProviders?.()
 
     const specs = await this.resolveTestSpecs(specsOrPaths)
 
-    await this.runTestFiles(specs, testNamePattern, !specsOrPaths)
+    // Set environment variables if provided
+    const previousEnv: Record<string, string | undefined> = {}
+    if (env) {
+      Object.keys(env).forEach((key) => {
+        previousEnv[key] = process.env[key]
+        process.env[key] = env[key]
+      })
+    }
 
-    // debugger never runs in watch mode
-    if (this.debug) {
-      await this.vitest.close()
-      this.emitter.close()
+    try {
+      await this.runTestFiles(specs, testNamePattern, !specsOrPaths)
+
+      // debugger never runs in watch mode
+      if (this.debug) {
+        await this.vitest.close()
+        this.emitter.close()
+      }
+    }
+    finally {
+      // Restore previous environment variables
+      if (env) {
+        Object.keys(env).forEach((key) => {
+          if (previousEnv[key] === undefined) {
+            delete process.env[key]
+          }
+          else {
+            process.env[key] = previousEnv[key]
+          }
+        })
+      }
     }
   }
 

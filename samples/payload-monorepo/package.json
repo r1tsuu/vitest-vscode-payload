@@ -1,0 +1,7 @@
+{
+  "name": "payload-monorepo",
+  "private": true,
+  "dependencies": {
+    "vitest": "catalog:latest"
+  }
+}

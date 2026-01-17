@@ -53,32 +53,56 @@ export class ExtensionWorkerRunner {
     return this.vitest.cancelCurrentRun('keyboard-input')
   }
 
-  async runTests(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string): Promise<void> {
+  async runTests(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string, env?: Record<string, string>): Promise<void> {
     const currentTestNamePattern = this.getGlobalTestNamePattern()
     if (testNamePattern) {
       this.vitest.setGlobalTestNamePattern(testNamePattern)
     }
 
-    if (!filesOrDirectories || this.isOnlyDirectories(filesOrDirectories)) {
-      const specifications = await this.vitest.getRelevantTestSpecifications(filesOrDirectories)
-      await this.vitest.rerunTestSpecifications(specifications, true)
-    }
-    else {
-      const specifications = await this.resolveTestSpecifications(filesOrDirectories)
-      await this.vitest.rerunTestSpecifications(specifications, false)
-    }
-
-    // debugger never runs in watch mode
-    if (this.debug) {
-      await this.vitest.close()
-      this.emitter.close()
+    // Set environment variables if provided
+    const previousEnv: Record<string, string | undefined> = {}
+    if (env) {
+      Object.keys(env).forEach((key) => {
+        previousEnv[key] = process.env[key]
+        process.env[key] = env[key]
+      })
     }
 
-    if (currentTestNamePattern) {
-      this.vitest.setGlobalTestNamePattern(currentTestNamePattern)
+    try {
+      if (!filesOrDirectories || this.isOnlyDirectories(filesOrDirectories)) {
+        const specifications = await this.vitest.getRelevantTestSpecifications(filesOrDirectories)
+        await this.vitest.rerunTestSpecifications(specifications, true)
+      }
+      else {
+        const specifications = await this.resolveTestSpecifications(filesOrDirectories)
+        await this.vitest.rerunTestSpecifications(specifications, false)
+      }
+
+      // debugger never runs in watch mode
+      if (this.debug) {
+        await this.vitest.close()
+        this.emitter.close()
+      }
     }
-    else {
-      this.vitest.resetGlobalTestNamePattern()
+    finally {
+      // Restore previous environment variables
+      if (env) {
+        Object.keys(env).forEach((key) => {
+          if (previousEnv[key] === undefined) {
+            delete process.env[key]
+          }
+          else {
+            process.env[key] = previousEnv[key]
+          }
+        })
+      }
+
+      if (currentTestNamePattern) {
+        this.vitest.setGlobalTestNamePattern(currentTestNamePattern)
+      }
+      else {
+        this.vitest.resetGlobalTestNamePattern()
+      }
     }
   }
 
@@ -100,11 +124,11 @@ export class ExtensionWorkerRunner {
     return specifications
   }
 
-  async updateSnapshots(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string): Promise<void> {
+  async updateSnapshots(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string, env?: Record<string, string>): Promise<void> {
     const currentTestNamePattern = this.getGlobalTestNamePattern()
     this.vitest.enableSnapshotUpdate()
     try {
-      return await this.runTests(filesOrDirectories, testNamePattern)
+      return await this.runTests(filesOrDirectories, testNamePattern, env)
     }
     finally {
       if (currentTestNamePattern) {

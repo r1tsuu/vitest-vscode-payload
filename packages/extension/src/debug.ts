@@ -32,6 +32,7 @@ export async function debugTests(
   request: vscode.TestRunRequest,
   token: vscode.CancellationToken,
   debugManager: DebugManager,
+  incomingEnv?: Record<string, unknown>,
 ) {
   const port = await getPort()
   const server = createServer().listen(port)
@@ -92,6 +93,7 @@ export async function debugTests(
       TEST: 'true',
       VITEST: 'true',
       NODE_ENV: env.NODE_ENV ?? process.env.NODE_ENV ?? 'test',
+      ...incomingEnv ?? {},
     },
   }
 

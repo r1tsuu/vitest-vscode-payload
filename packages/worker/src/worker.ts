@@ -41,12 +41,12 @@ export class ExtensionWorker implements ExtensionWorkerTransport {
     return this.runner.cancelRun()
   }
 
-  async runTests(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string): Promise<void> {
-    await this.runner.runTests(filesOrDirectories, testNamePattern)
+  async runTests(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string, env?: Record<string, string>): Promise<void> {
+    await this.runner.runTests(filesOrDirectories, testNamePattern, env)
   }
 
-  async updateSnapshots(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string): Promise<void> {
-    return this.runner.updateSnapshots(filesOrDirectories, testNamePattern)
+  async updateSnapshots(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string, env?: Record<string, string>): Promise<void> {
+    return this.runner.updateSnapshots(filesOrDirectories, testNamePattern, env)
   }
 
   watchTests(filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string): void {

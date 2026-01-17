@@ -405,6 +405,12 @@ importers:
         specifier: catalog:latest
         version: 4.0.15(@types/node@24.10.1)(@vitest/browser-playwright@4.0.15)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.2.0)(tsx@4.21.0)(yaml@2.8.2)
 
+  samples/payload-monorepo:
+    dependencies:
+      vitest:
+        specifier: catalog:latest
+        version: 4.0.15(@types/node@24.10.1)(@vitest/browser-playwright@4.0.15)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.2.0)(tsx@4.21.0)(yaml@2.8.2)
+
   samples/readme:
     devDependencies:
       vitest:

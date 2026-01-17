@@ -50,8 +50,8 @@ export interface ExtensionWorkerTransport {
   collectTests: (testFile: ExtensionTestSpecification[]) => Promise<void>
   cancelRun: () => Promise<void>
   // accepts files with the project or folders (project doesn't matter for them)
-  runTests: (filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string) => Promise<void>
-  updateSnapshots: (filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string) => Promise<void>
+  runTests: (filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string, env?: Record<string, string>) => Promise<void>
+  updateSnapshots: (filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string, env?: Record<string, string>) => Promise<void>
 
   watchTests: (filesOrDirectories?: ExtensionTestSpecification[] | string[], testNamePattern?: string) => void
   unwatchTests: () => void

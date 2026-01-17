@@ -282,14 +282,14 @@ export class TestRunner extends vscode.Disposable {
     await this.runTests(request, token)
   }
 
-  public async runTests(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
+  public async runTests(request: vscode.TestRunRequest, token: vscode.CancellationToken, env?: Record<string, string>) {
     // if request is continuous, we just mark it and wait for the changes to files
     // users can also click on "run" button to trigger the run
     if (request.continuous)
       return await this.watchContinuousTests(request, token)
 
     try {
-      await this.scheduleTestItems(request, token)
+      await this.scheduleTestItems(request, token, env)
     }
     catch (err: any) {
       // the rpc can be closed during the test run by clicking on reload
@@ -305,7 +305,7 @@ export class TestRunner extends vscode.Disposable {
     resolveWithoutRunning: () => void
   }[] = []
 
-  private async runTestItems(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
+  private async runTestItems(request: vscode.TestRunRequest, token: vscode.CancellationToken, env?: Record<string, string>) {
     this.cancelled = false
     this.nonContinuousRequest = request
 
@@ -324,8 +324,8 @@ export class TestRunner extends vscode.Disposable {
 
     const runTests = (files?: ExtensionTestSpecification[] | string[], testNamePatern?: string) =>
       'updateSnapshots' in request
-        ? this.api.updateSnapshots(files, testNamePatern)
-        : this.api.runFiles(files, testNamePatern)
+        ? this.api.updateSnapshots(files, testNamePatern, env)
+        : this.api.runFiles(files, testNamePatern, env)
 
     const tests = request.include || []
     if (!tests.length) {
@@ -349,9 +349,9 @@ export class TestRunner extends vscode.Disposable {
     }
   }
 
-  protected async scheduleTestItems(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
+  protected async scheduleTestItems(request: vscode.TestRunRequest, token: vscode.CancellationToken, env?: Record<string, string>) {
     if (!this.testRunDefer) {
-      await this.runTestItems(request, token)
+      await this.runTestItems(request, token, env)
     }
     else {
       log.verbose?.('Queueing a new test run to execute when the current one is finished.')
@@ -359,7 +359,7 @@ export class TestRunner extends vscode.Disposable {
         this.scheduleTestRunsQueue.push({
           runTests: () => {
             log.verbose?.('Scheduled test run is starting now.')
-            return this.runTestItems(request, token).then(resolve, reject)
+            return this.runTestItems(request, token, env).then(resolve, reject)
           },
           resolveWithoutRunning: resolve,
         })

@@ -12,6 +12,7 @@ import { DebugManager, debugTests } from './debug'
 import { ExtensionDiagnostic } from './diagnostic'
 import { ImportsBreakdownProvider } from './importsBreakdownProvider'
 import { log } from './log'
+import { resolveEnvForPayloadMonorepoTest } from './payload'
 import { TestRunner } from './runner'
 import { SchemaProvider } from './schemaProvider'
 import { TagsManager } from './tagsManager'
@@ -185,7 +186,9 @@ class VitestExtension {
         )
       }
       runProfile.tag = api.tag
-      runProfile.runHandler = (request, token) => runner.runTests(request, token)
+      runProfile.runHandler = async (request, token) => {
+        return runner.runTests(request, token, await resolveEnvForPayloadMonorepoTest(request))
+      }
       this.runProfiles.set(`${api.id}:run`, runProfile)
       let debugProfile = previousRunProfiles.get(`${api.id}:debug`)
       if (!debugProfile) {
@@ -214,6 +217,7 @@ class VitestExtension {
           request,
           token,
           this.debugManager,
+          await resolveEnvForPayloadMonorepoTest(request),
         ).catch((error) => {
           vscode.window.showErrorMessage(error.message)
         })

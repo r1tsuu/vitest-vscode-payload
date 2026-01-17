@@ -174,12 +174,12 @@ export class VitestFolderAPI {
     return this.meta.rpc.getModuleEnvironments(moduleId)
   }
 
-  async runFiles(specs?: ExtensionTestSpecification[] | string[], testNamePatern?: string) {
-    await this.meta.rpc.runTests(normalizeSpecs(specs), testNamePatern)
+  async runFiles(specs?: ExtensionTestSpecification[] | string[], testNamePatern?: string, env?: Record<string, string>) {
+    await this.meta.rpc.runTests(normalizeSpecs(specs), testNamePatern, env)
   }
 
-  async updateSnapshots(specs?: ExtensionTestSpecification[] | string[], testNamePatern?: string) {
-    await this.meta.rpc.updateSnapshots(normalizeSpecs(specs), testNamePatern)
+  async updateSnapshots(specs?: ExtensionTestSpecification[] | string[], testNamePatern?: string, env?: Record<string, string>) {
+    await this.meta.rpc.updateSnapshots(normalizeSpecs(specs), testNamePatern, env)
   }
 
   getFiles() {
